@@ -3,9 +3,8 @@
 **A repository dedicated to the research, development, and backtesting of systematic trading strategies across digital asset and equity markets.**
 
 <p align="center">
-  <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExejc1cXBwOWc0a2Q0aWV4emVzMDl4NTQ5b2YyYzh2Mzhka3JzazQ2MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/VdtTPt2wT5p0EtQDBn/giphy.gif" width="700" alt="Abstract Data Visualization GIF">
+  <img src="https://i.imgflip.com/9zla79.gif" width="700" alt="Abstract Data Visualization GIF">
 </p>
-
 ---
 
 ### Introduction
@@ -20,9 +19,10 @@ My work is centered around the full lifecycle of a quantitative strategy, from i
 
 #### 1. Signal Generation & Alpha Research
 Developing novel alpha signals from price, volume, and alternative data. This involves rigorous statistical testing and feature engineering to find predictive patterns.
-
+Currently I am working on different platform but mainly on quantower
+Here is an example of an indicator I created.
 <p align="center">
-  <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbm9oOXU0ODZ5ZGQzc2pkaDU2emY2dGgyN3p3ajhjcjJ3ZzBxOHR2ZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/27b1b6iWc12aJ43e5o/giphy.gif" width="600" alt="Chart Analysis GIF">
+  <img src="https://i.imgflip.com/9zlhxc.gif" width="600" alt="Chart Analysis GIF">
 </p>
 
 #### 2. Strategy Backtesting & Validation
