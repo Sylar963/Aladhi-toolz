@@ -52,14 +52,20 @@ Building low-latency connections to crypto and equity exchanges for automated, r
 ---
 
 ### Technology & Infrastructure
-
+<!-- Badges de tecnologías activas -->
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)
 ![NumPy](https://img.shields.io/badge/NumPy-013243?style=for-the-badge&logo=numpy&logoColor=white)
+![CCXT](https://img.shields.io/badge/CCXT-009875?style=for-the-badge) 
+![Pine Script](https://img.shields.io/badge/Pine%20Script-2962FF?style=for-the-badge&logo=tradingview&logoColor=white)
+![NinjaScript](https://img.shields.io/badge/NinjaScript-DD0000?style=for-the-badge&logo=csharp&logoColor=white)
+![Quantower](https://img.shields.io/badge/Quantower-0082C9?style=for-the-badge)
+
+<!-- Badges comentados para uso futuro -->
+<!-- 
 ![vectorbt](https://img.shields.io/badge/vectorbt-174A7E?style=for-the-badge)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white)
-![CCXT](https://img.shields.io/badge/CCXT-009875?style=for-the-badge)
-
+-->
 My work is primarily conducted in Python, leveraging the standard quantitative finance stack for efficiency and scalability.
 
 ---
