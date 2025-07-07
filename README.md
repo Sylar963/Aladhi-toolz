@@ -66,7 +66,7 @@ Building low-latency connections to crypto and equity exchanges for automated, r
 ![vectorbt](https://img.shields.io/badge/vectorbt-174A7E?style=for-the-badge)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white)
 -->
-My work is primarily conducted in Python, leveraging the standard quantitative finance stack for efficiency and scalability.
+My work is primarily conducted in Python,Tradingview, NinjaTrader and Quantower you can check my previous task on Upwork and I will upload here what I am publicy working on.
 
 ---
 
@@ -84,9 +84,9 @@ The work here forms the foundation for a future proprietary trading firm. The go
 
 I am available for consulting engagements and collaborative research projects. My expertise is particularly valuable for clients seeking to formalize and automate their discretionary trading ideas.
 
-*   **Upwork:** **[Hire Me for Custom Strategy Development](https://www.upwork.com/freelancers/~yourprofile)**
-*   **Professional Inquiries:** [your.email@example.com](mailto:your.email@example.com)
-*   **Connect on LinkedIn:** [My Professional Profile](https://linkedin.com/in/yourprofile)
+*   **Upwork:** **[Hire Me for Custom Strategy Development]([https://www.upwork.com/freelancers/aladhimarkets](https://upwork.com/freelancers/aladhimarkets?mp_source=share)**
+*   **Professional Inquiries:** [propfirmbuho@gmail.com](mailto:propfirmbuho@gmail.com)
+*   <!--**Connect on LinkedIn:** [My Professional Profile](https://linkedin.com/in/yourprofile)-->
 
 ---
 
