@@ -1,1 +1,1 @@
-GEMINI.MD
+GEMINI.md
