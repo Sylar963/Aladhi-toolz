@@ -1,4 +1,4 @@
-# Options Roll Cost Analyzer =Ê
+# Options Roll Cost Analyzer
 
 Hey there! Welcome to your personal options roll cost analyzer. If you're here, you probably trade options and want to make smarter decisions about when and how to roll your positions. Don't worry if you're not a coding expert - this guide will walk you through everything step by step.
 
@@ -27,7 +27,7 @@ If you don't know what Python is, think of it as the engine that runs this tool.
 1. Open your computer's terminal/command prompt
    - **Windows**: Search for "cmd" or "Command Prompt"
    - **Mac**: Search for "Terminal" 
-   - **Linux**: You probably already know what you're doing =	
+   - **Linux**: You probably already know what you're doing
 
 2. Type this and hit Enter: `python --version`
 3. If you see something like "Python 3.8.5", you're good to go!
@@ -148,7 +148,7 @@ If you're stuck or have questions:
 3. Make sure your market data is current
 4. Remember: when in doubt, smaller position sizes are your friend
 
-Happy trading! =€
+Happy trading!
 
 ---
 
