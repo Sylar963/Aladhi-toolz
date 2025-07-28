@@ -49,13 +49,12 @@ Building low-latency connections to crypto and equity exchanges for automated, r
 ### Repository Structure
 
 *   `/research_notebooks`: Jupyter notebooks detailing the exploratory data analysis (EDA) and hypothesis testing behind new strategies.
-*   `/indicators_library`: A curated library of custom-built and optimized technical indicators in Python.
+*   `/indicators_library`: A library of custom-built and optimized technical indicators in Python.
 *   `/strategy_backtests`: Code and performance reports for various quantitative strategies (Crypto & Equities).
-*   `/execution_utilities`: Reusable modules for interacting with exchange APIs (e.g., Binance, Alpaca).
+<!--*   `/execution_utilities`: Reusable modules for interacting with exchange APIs (e.g., Binance, Alpaca).>
 
----
 
-### Technology & Infrastructure
+ Technology & Infrastructure
 <!-- Badges de tecnologías activas -->
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)
