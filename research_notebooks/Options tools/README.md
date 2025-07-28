@@ -33,13 +33,23 @@ If you don't know what Python is, think of it as the engine that runs this tool.
 3. If you see something like "Python 3.8.5", you're good to go!
 4. If you get an error, head to [python.org](https://python.org) and download Python
 
-### Step 2: Get the tool ready
+### Step 2: Set up your API keys (CRITICAL!)
+
+**Before you can use the roll cost analyzer, you MUST create a keys.py file with your Thalex API credentials.**
+
+1. **Read the setup guide**: Open `_keys.example.md` in this folder for detailed instructions
+2. **Create keys.py**: Follow the guide to create your keys.py file with your actual API keys
+3. **Security note**: This example uses hardcoded keys for simplicity, but you should use environment variables in production (explained in the setup guide)
+
+**Don't skip this step!** The script will not work without proper API keys.
+
+### Step 3: Get the tool ready
 
 1. Navigate to where you downloaded this folder
 2. In your terminal, type: `cd "path/to/Options tools"`
 3. Run the script: `python roll_cost_analyzer.py`
 
-### Step 3: Follow the prompts
+### Step 4: Follow the prompts
 
 The tool will ask you some questions. Here's what each one means:
 
@@ -106,9 +116,19 @@ The tool might tell you:
 ## Troubleshooting
 
 **"I get an error when running the script"**
+- Make sure you created the keys.py file (see _keys.example.md)
 - Make sure you're in the right folder
 - Check that the file name is exactly `roll_cost_analyzer.py`
 - Try `python3 roll_cost_analyzer.py` instead
+
+**"ImportError: No module named 'keys'"**
+- You haven't created the keys.py file yet
+- Go back to Step 2 and follow the _keys.example.md guide
+
+**"Authentication failed" or "Connection errors"**
+- Your API keys are wrong or expired
+- Double-check you copied them correctly from Thalex
+- Make sure you're using the right network (testnet vs production)
 
 **"The numbers seem weird"**
 - Double-check your inputs (especially dates and prices)
