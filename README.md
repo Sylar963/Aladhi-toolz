@@ -18,7 +18,8 @@ My approach is grounded in statistical analysis, rigorous backtesting, and disci
 My work is centered around the full lifecycle of a quantitative strategy, from idea to execution.
 
 #### 1. Signal Generation & Alpha Research
-Developing novel alpha signals from price, volume, and alternative data. This involves rigorous statistical testing and feature engineering to find predictive patterns.
+Developing signals from price, volume, and alternative data. 
+
 Currently I am working on different platform but mainly on quantower
 Here is an example of an indicator I created.
 <p align="center">
@@ -34,7 +35,7 @@ Constructing robust trading models and validating their historical performance w
 *(This GIF should be a screen recording of one of your backtest reports, like from `vectorbt` or a custom script).*
 
 #### 3. Execution & Automation
-Building low-latency connections to crypto and equity exchanges for automated, real-time order execution. Reliability and precision are paramount.
+Building low-latency connections to crypto and equity exchanges for automated, real-time order execution.
 
 <p align="center">
   <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExN3Q3M2N5enhyOXg4OWk2ajg5ZmExdWUycXdxNjR2ejR4dnhjaXB6NyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Y3Bw0lpeWHJs1L0N2V/giphy.gif" width="600" alt="API Execution Log GIF">
