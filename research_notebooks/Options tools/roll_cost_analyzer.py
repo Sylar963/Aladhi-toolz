@@ -63,7 +63,7 @@ TARGET_STRIKES_OVERRIDE = {
 }
 
 # Settings
-USE_MANUAL_OVERRIDE = True  # Set to False to use automatic ATM detection
+USE_MANUAL_OVERRIDE = False  # Set to False to use automatic ATM detection
 UPDATE_INTERVAL = 5  # Console update interval in seconds
 PRICE_PRECISION = 2  # Number of decimal places for prices
 
