@@ -87,7 +87,7 @@ The work here forms the foundation for a future proprietary trading firm. The go
 
 I am available for consulting engagements and collaborative research projects. My expertise is particularly valuable for clients seeking to formalize and automate their discretionary trading ideas.
 
-*   **Upwork:** **[Hire Me for Custom Strategy Development]([https://www.upwork.com/freelancers/aladhimarkets](https://upwork.com/freelancers/aladhimarkets?mp_source=share)**
+*   **Upwork:** **[Hire Me for Consulting]([https://www.upwork.com/freelancers/aladhimarkets](https://upwork.com/freelancers/aladhimarkets?mp_source=share)**
 *   **Professional Inquiries:** [propfirmbuho@gmail.com](mailto:propfirmbuho@gmail.com)
 *   <!--**Connect on LinkedIn:** [My Professional Profile](https://linkedin.com/in/yourprofile)-->
 
