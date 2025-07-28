@@ -22,7 +22,7 @@ This tool helps you figure out if rolling is actually worth it or if you're just
 ## Getting Started (Don't Panic!)
 
 ### Step 1: Make sure you have Python installed
-If you don't know what Python is, think of it as the engine that runs this tool. Here's how to check:
+If you don't know what Python is. Here's how to check:
 
 1. Open your computer's terminal/command prompt
    - **Windows**: Search for "cmd" or "Command Prompt"
@@ -54,7 +54,7 @@ If you don't know what Python is, think of it as the engine that runs this tool.
 The tool will ask you some questions. Here's what each one means:
 
 **"Enter your current option details"**
-- **Symbol**: The stock ticker (like AAPL for Apple)
+- **Symbol**: The ticker 
 - **Strike price**: The price your option gives you the right to buy/sell at
 - **Expiration date**: When your current option expires
 - **Option type**: Call or Put
@@ -66,17 +66,14 @@ The tool will ask you some questions. Here's what each one means:
 - **Target price**: What the new option costs
 
 **"Enter market conditions"**
-- **Current stock price**: What the underlying stock is trading for
-- **Your broker's commission**: How much your broker charges per trade
-
+- **Current stock price**: What the underlying is trading for
+-
 ## What you'll get back
 
 The tool will spit out some numbers that look scary but are actually pretty simple:
 
 ### The Good Stuff:
-- **Net roll cost**: How much the roll will cost you (or save you!)
-- **Cost per day**: How much you're paying for each extra day in the trade
-- **Break-even movement**: How much the stock needs to move for the roll to pay off
+- **Net roll cost**: How much the roll will cost you (or save you)
 
 ### The Analysis:
 - **Recommendation**: Should you roll or not?
@@ -86,15 +83,13 @@ The tool will spit out some numbers that look scary but are actually pretty simp
 ## Real-World Example
 
 Let's say you have:
-- Apple (AAPL) $150 Call expiring this Friday
-- Stock is at $148
-- Your call is worth $0.50
-- You want to roll to next week's $150 call for $2.00
+- BTC (BTC) $20,000 Call expiring this Friday
+- Price is at $19,800
+- Your call is worth $150
+- You want to roll to next week's $20,000 call for $350
 
 The tool might tell you:
-- Roll cost: $1.50 per share ($150 total for 1 contract)
-- Cost per day: $0.21 per day
-- Break-even: Stock needs to hit $151.50 by new expiration
+- Roll cost: $200 per BTC ($20,000 total for 1 contract)
 
 ## Common Scenarios
 
@@ -108,7 +103,7 @@ The tool might tell you:
 - **Tool helps by**: Showing you the true cost of buying more time
 - **Tip**: Consider taking profits vs. paying for more time
 
-### Scenario 3: "The stock moved against me"
+### Scenario 3: "The price moved against me"
 - **When this happens**: Your call went down or put went up in value
 - **Tool helps by**: Analyzing if rolling to a better strike is worth it
 - **Tip**: Don't throw good money after bad
@@ -139,16 +134,6 @@ The tool might tell you:
 - Start with the recommendation - it's designed to be simple
 - Focus on the "cost per day" number - is it worth paying that much?
 - When in doubt, ask yourself: "Would I enter this trade fresh at these prices?"
-
-## Pro Tips
-
-1. **Don't roll just because you can** - Sometimes taking a loss is the smart move
-2. **Watch the calendar** - Rolling on expiration day is usually expensive
-3. **Consider the big picture** - Are you rolling because of analysis or emotions?
-4. **Keep track** - Use this tool to build a database of your roll decisions
-5. **Paper trade first** - Practice with fake money if you're new to rolling
-
-## A Friendly Warning
 
 This tool gives you math, not magic. It can't predict the future or guarantee profits. Always:
 - Do your own research
