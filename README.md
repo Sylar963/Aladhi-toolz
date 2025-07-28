@@ -41,7 +41,7 @@ Constructing robust trading models and validating their historical performance w
 Building low-latency connections to crypto and equity exchanges for automated, real-time order execution.
 
 <p align="center">
-  <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExN3Q3M2N5enhyOXg4OWk2ajg5ZmExdWUycXdxNjR2ejR4dnhjaXB6NyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Y3Bw0lpeWHJs1L0N2V/giphy.gif" width="600" alt="API Execution Log GIF">
+  <img src="https://i.imgflip.com/a1hdrn.gif" width="700" alt="Live Futures Roll Execution in Terminal">
 </p>
 
 ---
