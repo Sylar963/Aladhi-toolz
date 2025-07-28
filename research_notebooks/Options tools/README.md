@@ -49,24 +49,6 @@ If you don't know what Python is. Here's how to check:
 2. In your terminal, type: `cd "path/to/Options tools"`
 3. Run the script: `python roll_cost_analyzer.py`
 
-### Step 4: Follow the prompts
-
-The tool will ask you some questions. Here's what each one means:
-
-**"Enter your current option details"**
-- **Symbol**: The ticker 
-- **Strike price**: The price your option gives you the right to buy/sell at
-- **Expiration date**: When your current option expires
-- **Option type**: Call or Put
-- **Current price**: What the option is trading for right now
-
-**"Enter your target roll details"**
-- **New expiration**: When you want the new option to expire
-- **New strike**: The strike price for the new option (can be same as current)
-- **Target price**: What the new option costs
-
-**"Enter market conditions"**
-- **Current stock price**: What the underlying is trading for
 -
 ## What you'll get back
 
