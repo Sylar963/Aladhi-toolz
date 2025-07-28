@@ -30,9 +30,12 @@ Here is an example of an indicator I created.
 Constructing robust trading models and validating their historical performance with high-quality data. I focus heavily on out-of-sample testing and avoiding overfitting.
 
 <p align="center">
-  <img src="https://j.gifs.com/y0pP5r.gif" width="600" alt="Equity Curve Backtest GIF">
+  <img src="https://raw.githubusercontent.com/Sylar963/ALADHI-TOOLZ/main/rollcost.jpg" width="700" alt="BTC Options Roll Execution Summary">
 </p>
-*(This GIF should be a screen recording of one of your backtest reports, like from `vectorbt` or a custom script).*
+<p align="center">
+  <em>Example output from a proprietary options position management script.</em>
+</p>
+
 
 #### 3. Execution & Automation
 Building low-latency connections to crypto and equity exchanges for automated, real-time order execution.
