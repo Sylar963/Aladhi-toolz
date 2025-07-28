@@ -27,7 +27,7 @@ Here is an example of an indicator I created.
 </p>
 
 #### 2. Strategy Backtesting & Validation
-Constructing robust trading models and validating their historical performance with high-quality data. I focus heavily on out-of-sample testing and avoiding overfitting.
+Constructing robust trading models and validating their historical performance with high-quality data. I focus heavily on foward testing and avoiding overfitting.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/Sylar963/ALADHI-TOOLZ/main/rollcost.jpg" width="700" alt="BTC Options Roll Execution Summary">
