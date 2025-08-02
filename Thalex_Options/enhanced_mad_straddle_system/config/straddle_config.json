@@ -1,0 +1,9 @@
+{
+  "underlying": "BTCUSD",
+  "network": "wss://testnet.thalex.com/ws/api/v2",
+  "target_delta": 0.25,
+  "atm_tolerance": 50,
+  "update_interval": 5,
+  "data_retention_hours": 24,
+  "log_level": "INFO"
+}
