@@ -73,7 +73,7 @@ My work is primarily conducted in Python,Tradingview, NinjaTrader and Quantower 
 
 ---
 
-### Long-Term Vision: The Aladhi Trading Group
+### Long-Term Vision:  Trading Group
 
 The work here forms the foundation for a future proprietary trading firm. The goal is to build a collaborative environment—a modern trading floor—where data science and market expertise converge to generate consistent, risk-adjusted returns.
 
