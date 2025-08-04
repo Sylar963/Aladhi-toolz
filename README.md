@@ -18,7 +18,8 @@ My approach is grounded in statistical analysis, rigorous backtesting, and disci
 My work is centered around the full lifecycle of a quantitative strategy, from idea to execution.
 
 #### 1. Signal Generation & Alpha Research
-Developing novel alpha signals from price, volume, and alternative data. This involves rigorous statistical testing and feature engineering to find predictive patterns.
+Developing signals from price, volume, and alternative data. 
+
 Currently I am working on different platform but mainly on quantower
 Here is an example of an indicator I created.
 <p align="center">
@@ -26,18 +27,21 @@ Here is an example of an indicator I created.
 </p>
 
 #### 2. Strategy Backtesting & Validation
-Constructing robust trading models and validating their historical performance with high-quality data. I focus heavily on out-of-sample testing and avoiding overfitting.
+Constructing robust trading models and validating their historical performance with high-quality data. I focus heavily on foward testing and avoiding overfitting.
 
 <p align="center">
-  <img src="https://j.gifs.com/y0pP5r.gif" width="600" alt="Equity Curve Backtest GIF">
+  <img src="https://raw.githubusercontent.com/Sylar963/ALADHI-TOOLZ/main/rollcost.jpg" width="700" alt="BTC Options Roll Execution Summary">
 </p>
-*(This GIF should be a screen recording of one of your backtest reports, like from `vectorbt` or a custom script).*
+<p align="center">
+  <em>Example output from a proprietary options position management script.</em>
+</p>
+
 
 #### 3. Execution & Automation
-Building low-latency connections to crypto and equity exchanges for automated, real-time order execution. Reliability and precision are paramount.
+Building low-latency connections to crypto and equity exchanges for automated, real-time order execution.
 
 <p align="center">
-  <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExN3Q3M2N5enhyOXg4OWk2ajg5ZmExdWUycXdxNjR2ejR4dnhjaXB6NyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Y3Bw0lpeWHJs1L0N2V/giphy.gif" width="600" alt="API Execution Log GIF">
+  <img src="https://i.imgflip.com/a1hdrn.gif" width="700" alt="Live Futures Roll Execution in Terminal">
 </p>
 
 ---
@@ -45,13 +49,12 @@ Building low-latency connections to crypto and equity exchanges for automated, r
 ### Repository Structure
 
 *   `/research_notebooks`: Jupyter notebooks detailing the exploratory data analysis (EDA) and hypothesis testing behind new strategies.
-*   `/indicators_library`: A curated library of custom-built and optimized technical indicators in Python.
+*   `/indicators_library`: A library of custom-built and optimized technical indicators in Python.
 *   `/strategy_backtests`: Code and performance reports for various quantitative strategies (Crypto & Equities).
-*   `/execution_utilities`: Reusable modules for interacting with exchange APIs (e.g., Binance, Alpaca).
+<!--*   `/execution_utilities`: Reusable modules for interacting with exchange APIs (e.g., Binance, Alpaca).>
 
----
 
-### Technology & Infrastructure
+ Technology & Infrastructure
 <!-- Badges de tecnologías activas -->
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)
@@ -70,7 +73,7 @@ My work is primarily conducted in Python,Tradingview, NinjaTrader and Quantower 
 
 ---
 
-### Long-Term Vision: The Aladhi Trading Group
+### Long-Term Vision:  Trading Group
 
 The work here forms the foundation for a future proprietary trading firm. The goal is to build a collaborative environment—a modern trading floor—where data science and market expertise converge to generate consistent, risk-adjusted returns.
 
@@ -84,7 +87,7 @@ The work here forms the foundation for a future proprietary trading firm. The go
 
 I am available for consulting engagements and collaborative research projects. My expertise is particularly valuable for clients seeking to formalize and automate their discretionary trading ideas.
 
-*   **Upwork:** **[Hire Me for Custom Strategy Development]([https://www.upwork.com/freelancers/aladhimarkets](https://upwork.com/freelancers/aladhimarkets?mp_source=share)**
+*   **Upwork:** **[Hire Me for Consulting]([https://www.upwork.com/freelancers/aladhimarkets](https://upwork.com/freelancers/aladhimarkets?mp_source=share)**
 *   **Professional Inquiries:** [propfirmbuho@gmail.com](mailto:propfirmbuho@gmail.com)
 *   <!--**Connect on LinkedIn:** [My Professional Profile](https://linkedin.com/in/yourprofile)-->
 
