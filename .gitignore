@@ -1,2 +1,11 @@
 GEMINI.md
 CLAUDE.MD
+
+
+#python __pycache__/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.egg       
