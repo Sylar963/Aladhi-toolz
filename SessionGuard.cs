@@ -11,101 +11,64 @@ using TradingPlatform.BusinessLayer;
 namespace TradingSessions
 {
     /// <summary>
-    /// Session Angel - Optimized Trading Guardian & Risk Management Indicator
-    /// HFT-optimized version with reduced overhead and memory allocations
+    /// Session Angel - Trading Guardian & Risk Management Indicator
+    /// Monitors trading activity and protects against excessive losses
     /// </summary>
-    public class OPAngelSession : Indicator
+    public class SessionAngel : Indicator
     {
-        #region Private Fields - Optimized State Management
+        #region Private Fields
 
-        // Session tracking - cached DateTime operations
+        // Session tracking
         private DateTime _lastProcessedDate = DateTime.MinValue;
         private DateTime _sessionStartTime = DateTime.MinValue;
         private int _animationFrame = 0;
-        private DateTime _cacheCurrentTime; // Cache current time per update cycle
-        private long _lastAnimationTicks = 0; // Use ticks for faster comparison
+        private DateTime _lastAnimationUpdate = DateTime.MinValue;
 
-        // Trading activity tracking - use doubles for better performance
+        // Trading activity tracking
         private double _sessionStartBalance = 0.0;
         private double _currentSessionPnL = 0.0;
         private double _maxDrawdown = 0.0;
         private double _maxProfit = 0.0;
         private double _lastDayProfit = 0.0;
 
-        // Risk management - minimize bool operations
-        private byte _riskState = 0; // 0=Safe, 1=Warning, 2=Danger (faster than multiple bools)
+        // Risk management
+        private bool _warningActive = false;
+        private bool _dangerActive = false;
         private DateTime _lastWarningTime = DateTime.MinValue;
-        private List<DateTime> _warningHistory = new List<DateTime>(16); // Pre-allocate capacity
+        private List<DateTime> _warningHistory = new List<DateTime>();
 
-        // Session statistics - pre-allocated
-        private double _mfe = 0.0;
-        private double _mae = 0.0;
+        // Session statistics
+        private double _mfe = 0.0; // Maximum Favorable Excursion
+        private double _mae = 0.0; // Maximum Adverse Excursion
         private int _totalTrades = 0;
         private int _winningTrades = 0;
         private int _losingTrades = 0;
         private double _largestWin = 0.0;
         private double _largestLoss = 0.0;
 
-        // Visual effects - optimized animation state
+        // Visual effects
         private float _warningPulse = 0.5f;
         private bool _warningPulseDirection = true;
         private float _dangerFlash = 0.0f;
         private bool _dangerFlashDirection = true;
+        private Color _currentWarningColor = Color.Orange;
 
-        // Pre-calculated animation constants
-        private readonly float _pulseIncrement = 0.03f;
-        private readonly float _flashIncrement = 0.1f;
-        private readonly float _pulseMin = 0.3f;
-        private readonly float _pulseMax = 1.0f;
-        private readonly float _warningHysteresis = 0.8f;
+        // Session times (reusing from sessionsGDI)
+        private TimeSpan _nySessionStart = new TimeSpan(9, 30, 0);
+        private TimeSpan _nySessionEnd = new TimeSpan(16, 0, 0);
+        private TimeSpan _londonSessionStart = new TimeSpan(3, 0, 0);
+        private TimeSpan _londonSessionEnd = new TimeSpan(11, 0, 0);
+        private TimeSpan _tokyoSessionStart = new TimeSpan(19, 0, 0);
+        private TimeSpan _tokyoSessionEnd = new TimeSpan(4, 0, 0);
 
-        // Session times - readonly for performance
-        private readonly TimeSpan _nySessionStart = new TimeSpan(9, 30, 0);
-        private readonly TimeSpan _nySessionEnd = new TimeSpan(16, 0, 0);
-        private readonly TimeSpan _londonSessionStart = new TimeSpan(3, 0, 0);
-        private readonly TimeSpan _londonSessionEnd = new TimeSpan(11, 0, 0);
-        private readonly TimeSpan _tokyoSessionStart = new TimeSpan(19, 0, 0);
-        private readonly TimeSpan _tokyoSessionEnd = new TimeSpan(4, 0, 0);
+        // Current active session
+        private string _currentActiveSession = "None";
 
-        // Current active session - use byte for memory efficiency
-        private byte _currentActiveSessionId = 0; // 0=None, 1=NY, 2=London, 3=Tokyo
-
-        // Cached session names - avoid string allocations
-        private static readonly string[] _sessionNames = { "None", "New York", "London", "Tokyo" };
-
-        // Graphics objects cache - reuse instead of creating
+        // Custom fonts and brushes
         private Font _headerFont;
         private Font _sessionFont;
         private Font _warningFont;
         private Font _statsFont;
-
-        // Cached brushes and pens - avoid repeated allocations
-        private SolidBrush _cachedSafeBrush;
-        private SolidBrush _cachedWarningBrush;
-        private SolidBrush _cachedDangerBrush;
-        private SolidBrush _cachedWhiteBrush;
-        private SolidBrush _cachedGrayBrush;
-
-        // Pre-calculated values to avoid repeated calculations
-        private double _cachedCurrentLoss = 0.0;
-        private bool _needsRiskRecalc = true;
-
-        // Animation timing optimization
-        private readonly long _animationIntervalTicks;
-
-        // PERFORMANCE: Rate limit account data access
-        private int _updateCounter = 0;
-        private const int ACCOUNT_UPDATE_INTERVAL = 50; // Only check account every 50 updates
-
-        // Volume bar specific tracking
-        private double _currentVolumeBarVolume = 0.0;
-        private double _averageVolumePerBar = 0.0;
-        private double _totalVolumeProcessed = 0.0;
-        private int _volumeBarCount = 0;
-
-        // Position transition tracking for trade stats and risk reset
-        private bool _wasInPosition = false;
-        private double _lastFlatBalance = 0.0;
 
         #endregion
 
@@ -127,10 +90,10 @@ namespace TradingSessions
         public bool ShowSessionStats { get; set; } = true;
 
         [InputParameter("Show Risk Panel", 220)]
-        public bool ShowRiskPanel { get; set; } = true; // Show panel by default
+        public bool ShowRiskPanel { get; set; } = true;
 
         [InputParameter("Show Performance Metrics", 230)]
-        public bool ShowPerformanceMetrics { get; set; } = false; // PERFORMANCE: Default OFF
+        public bool ShowPerformanceMetrics { get; set; } = true;
 
         [InputParameter("Warning Color", 300)]
         public Color WarningColor { get; set; } = Color.Orange;
@@ -153,374 +116,175 @@ namespace TradingSessions
         [InputParameter("Reset Daily at Session Open", 500)]
         public bool ResetDailyAtSessionOpen { get; set; } = true;
 
-        [InputParameter("Volume Bar Size", 510, 100, 10000, 100, 0)]
-        public int VolumeBarSize { get; set; } = 1000;
-
-        [InputParameter("Show Volume Statistics", 520)]
-        public bool ShowVolumeStats { get; set; } = true;
-
-        [InputParameter("Account Name (leave empty for auto)", 530)]
-        public string AccountName { get; set; } = ""; // Empty = auto select first
-
-        // Simple account tracking
-        private string _currentAccountName = "";
-        private string _availableAccountsList = "";
-
         #endregion
 
         /// <summary>
-        /// Constructor - Volume-based Guardian Angel
+        /// Constructor
         /// </summary>
-        public OPAngelSession() : base()
+        public SessionAngel() : base()
         {
-            Name = "Volume Guard Angel";
-            Description = "Volume-based Trading Guardian & Risk Management";
-
-            // Pre-calculate animation interval in ticks for faster comparison
-            _animationIntervalTicks = TimeSpan.FromMilliseconds(50).Ticks;
+            Name = "Session Angel";
+            Description = "Trading Guardian & Risk Management with Session Statistics";
 
             // Add invisible line series for data storage
             AddLineSeries("PnL", Color.Transparent, 1, LineStyle.Solid);
             AddLineSeries("Drawdown", Color.Transparent, 1, LineStyle.Solid);
             AddLineSeries("Warning Level", Color.Transparent, 1, LineStyle.Solid);
 
-            SeparateWindow = true; // PERFORMANCE: Move to separate window
-
-            // Note: Volume aggregation will be handled through chart settings, not in indicator code
+            SeparateWindow = false;
         }
 
         /// <summary>
         /// Override ShortName property
         /// </summary>
-        public override string ShortName => "VolumeGuard";
+        public override string ShortName => "SessionAngel";
 
         /// <summary>
-        /// Initialize - Create cached objects and detect accounts
+        /// Initialize
         /// </summary>
         protected override void OnInit()
         {
-            InitializeOptimizedGraphicsResources();
-            DetectAvailableAccounts();
+            InitializeGraphicsResources();
             ResetSessionData();
             InitializeTradingTracking();
         }
 
         /// <summary>
-        /// Initialize graphics resources - cache frequently used objects
+        /// Initialize graphics resources
         /// </summary>
-        private void InitializeOptimizedGraphicsResources()
+        private void InitializeGraphicsResources()
         {
             try
             {
-                // Dispose existing resources
-                DisposeGraphicsResources();
+                _headerFont?.Dispose();
+                _sessionFont?.Dispose();
+                _warningFont?.Dispose();
+                _statsFont?.Dispose();
 
-                // Create fonts
                 _headerFont = new Font("Segoe UI", 18, FontStyle.Bold);
                 _sessionFont = new Font("Segoe UI", 12, FontStyle.Regular);
                 _warningFont = new Font("Segoe UI", 16, FontStyle.Bold);
                 _statsFont = new Font("Consolas", 10, FontStyle.Regular);
-
-                // Create cached brushes to avoid repeated allocations
-                _cachedSafeBrush = new SolidBrush(SafeColor);
-                _cachedWarningBrush = new SolidBrush(WarningColor);
-                _cachedDangerBrush = new SolidBrush(DangerColor);
-                _cachedWhiteBrush = new SolidBrush(Color.White);
-                _cachedGrayBrush = new SolidBrush(Color.LightGray);
             }
             catch
             {
-                // Fallback to system fonts if creation fails
                 _headerFont = SystemFonts.DefaultFont;
                 _sessionFont = SystemFonts.DefaultFont;
                 _warningFont = SystemFonts.DefaultFont;
                 _statsFont = SystemFonts.DefaultFont;
-
-                // Create basic brushes
-                _cachedSafeBrush = new SolidBrush(Color.Green);
-                _cachedWarningBrush = new SolidBrush(Color.Orange);
-                _cachedDangerBrush = new SolidBrush(Color.Red);
-                _cachedWhiteBrush = new SolidBrush(Color.White);
-                _cachedGrayBrush = new SolidBrush(Color.Gray);
             }
         }
 
         /// <summary>
-        /// Reset session data - FIXED: Reset session baseline properly
+        /// Reset session data
         /// </summary>
         private void ResetSessionData()
         {
             _lastProcessedDate = DateTime.MinValue;
             _sessionStartTime = DateTime.Now;
 
-            // Reset trading metrics - FIXED: Include session start balance reset
-            _sessionStartBalance = 0.0; // CRITICAL FIX: Reset baseline to trigger new session
+            // Reset trading metrics
             _currentSessionPnL = 0.0;
             _maxDrawdown = 0.0;
             _maxProfit = 0.0;
             _mfe = 0.0;
             _mae = 0.0;
 
-            // Reset risk state
-            _riskState = 0; // Safe
+            // Reset warning states
+            _warningActive = false;
+            _dangerActive = false;
             _warningHistory.Clear();
-            _needsRiskRecalc = true;
 
             // Reset animation
             _animationFrame = 0;
             _warningPulse = 0.5f;
             _dangerFlash = 0.0f;
-            _lastAnimationTicks = 0;
-
-            // Reset volume tracking
-            _currentVolumeBarVolume = 0.0;
-            _averageVolumePerBar = 0.0;
-            _totalVolumeProcessed = 0.0;
-            _volumeBarCount = 0;
-
-            // Reset position-tracking baselines
-            _wasInPosition = false;
-            _lastFlatBalance = 0.0;
         }
 
         /// <summary>
-        /// CLEAN LOGIC: Detect all available accounts
-        /// </summary>
-        private void DetectAvailableAccounts()
-        {
-            try
-            {
-                var accounts = Core.Instance?.Accounts;
-                if (accounts != null && accounts.Any())
-                {
-                    var accountNames = new List<string>();
-
-                    foreach (var account in accounts)
-                    {
-                        var name = account.Name ?? "Unknown";
-                        accountNames.Add(name);
-                    }
-
-                    _availableAccountsList = string.Join(", ", accountNames);
-                    System.Diagnostics.Debug.WriteLine($"Volume Guard Angel: Available accounts: {_availableAccountsList}");
-                }
-                else
-                {
-                    _availableAccountsList = "No accounts found";
-                    System.Diagnostics.Debug.WriteLine("Volume Guard Angel: No accounts detected");
-                }
-            }
-            catch (Exception ex)
-            {
-                _availableAccountsList = "Error detecting accounts";
-                System.Diagnostics.Debug.WriteLine($"Volume Guard Angel: Error detecting accounts: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// CLEAN LOGIC: Get selected account by name or auto-select first
-        /// </summary>
-        private Account GetSelectedAccount()
-        {
-            try
-            {
-                var accounts = Core.Instance?.Accounts;
-                if (accounts == null || !accounts.Any())
-                    return null;
-
-                // If user specified account name, find it
-                if (!string.IsNullOrEmpty(AccountName))
-                {
-                    var selectedAccount = accounts.FirstOrDefault(a =>
-                        a.Name?.Equals(AccountName, StringComparison.OrdinalIgnoreCase) == true ||
-                        a.Name?.Contains(AccountName, StringComparison.OrdinalIgnoreCase) == true);
-
-                    if (selectedAccount != null)
-                    {
-                        _currentAccountName = selectedAccount.Name ?? "Unknown";
-                        return selectedAccount;
-                    }
-                }
-
-                // Auto-select first account
-                var firstAccount = accounts.FirstOrDefault();
-                _currentAccountName = firstAccount?.Name ?? "Unknown";
-                return firstAccount;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Volume Guard Angel: Error getting account: {ex.Message}");
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Initialize trading tracking - FIXED: No fake balance
+        /// Initialize trading activity tracking
         /// </summary>
         private void InitializeTradingTracking()
         {
-            // FIXED: No hard-coded fake balance - let it initialize from real account data
-            _sessionStartBalance = 0.0; // Will be set from real account equity on first update
+            // This would connect to account/position data
+            // For now, we'll simulate with price movements
+            _sessionStartBalance = 10000.0; // Default starting balance
         }
 
         /// <summary>
-        /// Main update method - PERFORMANCE CRITICAL: Rate limited
+        /// Main update method
         /// </summary>
         protected override void OnUpdate(UpdateArgs args)
         {
             if (Count < 1) return;
 
-            _updateCounter++;
+            var currentTime = Time();
+            var currentPrice = Close();
 
-            // PERFORMANCE: Only do expensive operations every Nth update
-            if (_updateCounter % ACCOUNT_UPDATE_INTERVAL == 0)
+            // Reset if new trading day
+            if (currentTime.Date != _lastProcessedDate.Date)
             {
-                // Cache current time once per update cycle
-                _cacheCurrentTime = Time();
-
-                // Fast date comparison - check if new trading day
-                if (_cacheCurrentTime.Date != _lastProcessedDate.Date)
+                if (ResetDailyAtSessionOpen)
                 {
-                    if (ResetDailyAtSessionOpen)
-                    {
-                        // FIXED: Save yesterday's P&L BEFORE reset
-                        _lastDayProfit = _currentSessionPnL;
-                        ResetSessionData();
-                    }
-                    _lastProcessedDate = _cacheCurrentTime.Date;
+                    _lastDayProfit = _currentSessionPnL;
+                    ResetSessionData();
                 }
-
-                // Update current active session - optimized
-                UpdateActiveSessionOptimized();
-
-                // Update trading activity - EXPENSIVE! Rate limited
-                UpdateTradingActivityOptimized();
-
-                // Check risk thresholds - only when needed
-                if (_needsRiskRecalc)
-                {
-                    CheckRiskThresholdsOptimized();
-                    _needsRiskRecalc = false;
-                }
+                _lastProcessedDate = currentTime.Date;
             }
 
-            // FAST PATH: Only do lightweight operations every update
-            SetLineSeriesOptimized();
+            // Update current active session
+            UpdateActiveSession(currentTime);
+
+            // Simulate trading activity (in real implementation, this would read actual account data)
+            UpdateSimulatedTradingActivity(currentPrice);
+
+            // Check risk thresholds
+            CheckRiskThresholds();
+
+            // Update statistics
+            UpdateSessionStatistics();
+
+            // Update animations
+            UpdateAnimationEffects();
+
+            // Set line series values
+            SetLineSeries();
         }
 
         /// <summary>
-        /// Update active session - optimized with byte comparison
+        /// Update current active session
         /// </summary>
-        private void UpdateActiveSessionOptimized()
+        private void UpdateActiveSession(DateTime currentTime)
         {
-            var timeOfDay = _cacheCurrentTime.TimeOfDay;
+            var timeOfDay = currentTime.TimeOfDay;
 
-            byte newSessionId = 0; // None
-
-            if (IsInSessionFast(timeOfDay, _nySessionStart, _nySessionEnd))
-                newSessionId = 1; // NY
-            else if (IsInSessionFast(timeOfDay, _londonSessionStart, _londonSessionEnd))
-                newSessionId = 2; // London
-            else if (IsInSessionFast(timeOfDay, _tokyoSessionStart, _tokyoSessionEnd))
-                newSessionId = 3; // Tokyo
-
-            _currentActiveSessionId = newSessionId;
+            if (IsInSession(currentTime, _nySessionStart, _nySessionEnd))
+                _currentActiveSession = "New York";
+            else if (IsInSession(currentTime, _londonSessionStart, _londonSessionEnd))
+                _currentActiveSession = "London";
+            else if (IsInSession(currentTime, _tokyoSessionStart, _tokyoSessionEnd))
+                _currentActiveSession = "Tokyo";
+            else
+                _currentActiveSession = "None";
         }
 
         /// <summary>
-        /// Fast session check - optimized comparison
+        /// Simulate trading activity (replace with real account data)
         /// </summary>
-        private bool IsInSessionFast(TimeSpan timeOfDay, TimeSpan sessionStart, TimeSpan sessionEnd)
+        private void UpdateSimulatedTradingActivity(double currentPrice)
         {
-            return sessionEnd > sessionStart ?
-                (timeOfDay >= sessionStart && timeOfDay <= sessionEnd) :
-                (timeOfDay >= sessionStart || timeOfDay <= sessionEnd);
-        }
+            // This is a placeholder - in real implementation, you would:
+            // 1. Access actual account P&L
+            // 2. Read position data
+            // 3. Calculate real-time profit/loss
 
-        /// <summary>
-        /// Update trading activity - REAL ACCOUNT DATA with dropdown selection!
-        /// </summary>
-        private void UpdateTradingActivityOptimized()
-        {
-            // GET REAL ACCOUNT DATA - User selected account from dropdown!
-            try
-            {
-                var account = GetSelectedAccount();
+            // For demonstration, simulate P&L based on price volatility
+            var priceChange = Count > 1 ? (currentPrice - Close(1)) : 0;
+            var simulatedPnL = priceChange * 10; // Simulate position size effect
 
-                if (account != null)
-                {
-                    // REAL P&L from YOUR SELECTED account
-                    var currentBalance = account.Balance;
+            _currentSessionPnL += simulatedPnL;
 
-                    // Calculate total unrealized P&L from positions for THIS account only
-                    var totalUnrealizedPnL = 0.0;
-                    var inPosition = false;
-                    foreach (Position pos in Core.Positions)
-                    {
-                        if (pos.ConnectionId == account.ConnectionId)
-                        {
-                            totalUnrealizedPnL += pos.NetPnL.Value;
-                            try
-                            {
-                                if (pos.Quantity != 0)
-                                    inPosition = true;
-                            }
-                            catch { /* Quantity property may not be available in some connections */ }
-                        }
-                    }
-
-                    var currentEquity = currentBalance + totalUnrealizedPnL;
-
-                    // FIXED: Track session P&L based on REAL account data
-                    if (_sessionStartBalance == 0.0)
-                    {
-                        _sessionStartBalance = currentEquity; // Set fresh baseline for new session
-                        _currentSessionPnL = 0.0; // Start at zero for new session
-                    }
-                    else
-                    {
-                        _currentSessionPnL = currentEquity - _sessionStartBalance; // REAL session P&L!
-                    }
-                    // Risk only active while holding a position; turn off when flat
-                    if (!inPosition)
-                    {
-                        if (_wasInPosition)
-                        {
-                            // Position just closed: compute realized PnL using balance delta
-                            var realizedTradePnL = account.Balance - _lastFlatBalance;
-                            _totalTrades++;
-                            if (realizedTradePnL > 0) _winningTrades++;
-                            else if (realizedTradePnL < 0) _losingTrades++;
-                            if (realizedTradePnL > _largestWin) _largestWin = realizedTradePnL;
-                            if (realizedTradePnL < _largestLoss) _largestLoss = realizedTradePnL;
-                        }
-
-                        _wasInPosition = false;
-                        _riskState = 0;            // Shut down warning/danger when flat
-                        _needsRiskRecalc = false;  // Skip risk calc while flat
-                    }
-                    else
-                    {
-                        if (!_wasInPosition)
-                        {
-                            // Position just opened: capture balance baseline for realized PnL
-                            _lastFlatBalance = account.Balance;
-                        }
-                        _wasInPosition = true;
-                        _needsRiskRecalc = true;
-                    }
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine("Volume Guard Angel: No account selected or found");
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Volume Guard Angel: Account access error: {ex.Message}");
-            }
-
-            // FIXED: Update MFE/MAE based on REAL P&L data
+            // Update MFE/MAE
             if (_currentSessionPnL > _maxProfit)
             {
                 _maxProfit = _currentSessionPnL;
@@ -530,93 +294,87 @@ namespace TradingSessions
             if (_currentSessionPnL < _maxDrawdown)
             {
                 _maxDrawdown = _currentSessionPnL;
-                _mae = Math.Abs(_maxDrawdown); // FIXED: Use proper absolute value for MAE
-            }
-
-            // Track volume-based statistics
-            if (Count > 0)
-            {
-                _volumeBarCount = Count;
-                _currentVolumeBarVolume = Volume();
-                _totalVolumeProcessed += _currentVolumeBarVolume;
-                _averageVolumePerBar = _totalVolumeProcessed / _volumeBarCount;
-
-                // Trade statistics will be updated based on real account data
-                // No simulation-based statistics
+                _mae = Math.Abs(_maxDrawdown);
             }
         }
 
         /// <summary>
-        /// Check risk thresholds - optimized logic
+        /// Check risk management thresholds
         /// </summary>
-        private void CheckRiskThresholdsOptimized()
+        private void CheckRiskThresholds()
         {
-            // Pre-calculate current loss once
-            _cachedCurrentLoss = _currentSessionPnL < 0.0 ? -_currentSessionPnL : 0.0;
+            var currentLoss = Math.Abs(Math.Min(_currentSessionPnL, 0));
 
-            var previousRiskState = _riskState;
-
-            // Optimized state machine
-            if (_cachedCurrentLoss >= DailyLossLimit)
+            // Check danger threshold (daily loss limit)
+            if (currentLoss >= DailyLossLimit)
             {
-                _riskState = 2; // Danger
-            }
-            else if (_cachedCurrentLoss >= WarningThreshold)
-            {
-                _riskState = 1; // Warning
-            }
-            else if (_cachedCurrentLoss < WarningThreshold * _warningHysteresis)
-            {
-                _riskState = 0; // Safe
-            }
-
-            // Trigger alerts only on state change
-            if (_riskState != previousRiskState)
-            {
-                switch (_riskState)
+                if (!_dangerActive)
                 {
-                    case 1: TriggerWarningAlertOptimized(); break;
-                    case 2: TriggerDangerAlertOptimized(); break;
+                    _dangerActive = true;
+                    TriggerDangerAlert();
                 }
+            }
+            else
+            {
+                _dangerActive = false;
+            }
+
+            // Check warning threshold
+            if (currentLoss >= WarningThreshold && !_dangerActive)
+            {
+                if (!_warningActive)
+                {
+                    _warningActive = true;
+                    TriggerWarningAlert();
+                }
+            }
+            else if (currentLoss < WarningThreshold * 0.8) // Hysteresis
+            {
+                _warningActive = false;
             }
 
             // Check drawdown limit
-            if (-_maxDrawdown >= MaxDrawdownLimit)
+            if (Math.Abs(_maxDrawdown) >= MaxDrawdownLimit)
             {
-                TriggerDrawdownAlertOptimized();
+                TriggerDrawdownAlert();
             }
         }
 
         /// <summary>
-        /// Optimized warning alert
+        /// Trigger warning alert
         /// </summary>
-        private void TriggerWarningAlertOptimized()
+        private void TriggerWarningAlert()
         {
-            _lastWarningTime = _cacheCurrentTime;
+            _lastWarningTime = DateTime.Now;
             _warningHistory.Add(_lastWarningTime);
 
             if (EnableAudioAlerts)
             {
+                // Audio alert would go here
                 System.Console.Beep(800, 200);
             }
         }
 
         /// <summary>
-        /// Optimized danger alert
+        /// Trigger danger alert
         /// </summary>
-        private void TriggerDangerAlertOptimized()
+        private void TriggerDangerAlert()
         {
             if (EnableAudioAlerts)
             {
-                // Reduced audio alert for performance
-                System.Console.Beep(1000, 300);
+                // More urgent audio alert
+                for (int i = 0; i < 3; i++)
+                {
+                    System.Console.Beep(1000, 300);
+                    System.Threading.Thread.Sleep(100);
+                }
             }
         }
 
         /// <summary>
-        /// Optimized drawdown alert
+        /// Trigger drawdown alert
         /// </summary>
-        private void TriggerDrawdownAlertOptimized()
+        private void TriggerDrawdownAlert()
         {
             if (EnableAudioAlerts)
             {
@@ -625,55 +383,50 @@ namespace TradingSessions
         }
 
         /// <summary>
-        /// Update session statistics - placeholder
+        /// Update session statistics
         /// </summary>
         private void UpdateSessionStatistics()
         {
-            // Placeholder for future implementation
+            // Calculate win/loss ratios, profit factors, etc.
+            // This would be expanded with real trading data
         }
 
         /// <summary>
-        /// Update animation effects - rate limited and optimized
+        /// Update animation effects
         /// </summary>
-        private void UpdateAnimationEffectsOptimized()
+        private void UpdateAnimationEffects()
         {
-            var currentTicks = _cacheCurrentTime.Ticks;
-
-            // Rate-limited animation updates using ticks for faster comparison
-            if ((currentTicks - _lastAnimationTicks) >= (_animationIntervalTicks / AnimationSpeed))
+            var now = DateTime.Now;
+            if ((now - _lastAnimationUpdate).TotalMilliseconds >= (50 / AnimationSpeed))
             {
                 _animationFrame = (_animationFrame + 1) % 360;
 
-                // Optimized pulse calculation
-                var pulseSpeed = _pulseIncrement * AnimationSpeed;
-
+                // Warning pulse effect
                 if (_warningPulseDirection)
                 {
-                    _warningPulse += pulseSpeed;
-                    if (_warningPulse >= _pulseMax)
+                    _warningPulse += 0.03f * AnimationSpeed;
+                    if (_warningPulse >= 1.0f)
                     {
-                        _warningPulse = _pulseMax;
+                        _warningPulse = 1.0f;
                         _warningPulseDirection = false;
                     }
                 }
                 else
                 {
-                    _warningPulse -= pulseSpeed;
-                    if (_warningPulse <= _pulseMin)
+                    _warningPulse -= 0.03f * AnimationSpeed;
+                    if (_warningPulse <= 0.3f)
                     {
-                        _warningPulse = _pulseMin;
+                        _warningPulse = 0.3f;
                         _warningPulseDirection = true;
                     }
                 }
 
-                // Optimized danger flash (only when in danger state)
-                if (_riskState == 2) // Danger
+                // Danger flash effect
+                if (_dangerActive)
                 {
-                    var flashSpeed = _flashIncrement * AnimationSpeed;
-
                     if (_dangerFlashDirection)
                     {
-                        _dangerFlash += flashSpeed;
+                        _dangerFlash += 0.1f * AnimationSpeed;
                         if (_dangerFlash >= 1.0f)
                         {
                             _dangerFlash = 1.0f;
@@ -682,7 +435,7 @@ namespace TradingSessions
                     }
                     else
                     {
-                        _dangerFlash -= flashSpeed;
+                        _dangerFlash -= 0.1f * AnimationSpeed;
                         if (_dangerFlash <= 0.0f)
                         {
                             _dangerFlash = 0.0f;
@@ -691,261 +444,167 @@ namespace TradingSessions
                     }
                 }
 
-                _lastAnimationTicks = currentTicks;
+                _lastAnimationUpdate = now;
             }
         }
 
         /// <summary>
-        /// Set line series values - optimized
+        /// Set line series values
         /// </summary>
-        private void SetLineSeriesOptimized()
+        private void SetLineSeries()
         {
             SetValue(_currentSessionPnL, 0);
             SetValue(_maxDrawdown, 1);
-            SetValue(_riskState > 0 ? 1.0 : 0.0, 2); // Convert risk state to double
-        }
-
-        // Volume bar tracking
-        private int _lastVolumeBarCount = 0;
-        private bool _newVolumeBarDetected = false;
-        private byte _lastPaintedRiskState = 255; // Force initial paint
-        private bool _forceRepaint = false;
-
-        /// <summary>
-        /// Helper method to check if enough time has passed for updates
-        /// </summary>
-        private bool ShouldUpdateComponent(long intervalMultiplier = 1)
-        {
-            return (DateTime.Now.Ticks - _lastAnimationTicks) >= (_animationIntervalTicks * intervalMultiplier);
+            SetValue(_warningActive ? 1 : 0, 2);
         }
 
         /// <summary>
-        /// Helper method to create alpha-blended colors
-        /// </summary>
-        private Color CreateAlphaColor(int alpha, Color baseColor)
-        {
-            return Color.FromArgb(alpha, baseColor);
-        }
-
-        /// <summary>
-        /// Helper method to create animated alpha colors
-        /// </summary>
-        private Color CreateAnimatedColor(float intensity, Color baseColor)
-        {
-            return Color.FromArgb((int)(255 * intensity), baseColor);
-        }
-
-        /// <summary>
-        /// Helper method to draw background panels with consistent styling
-        /// </summary>
-        private void DrawBackgroundPanel(Graphics graphics, RectangleF rect, Color baseColor, int alpha = 160)
-        {
-            using (var bgBrush = new SolidBrush(CreateAlphaColor(alpha, baseColor)))
-            {
-                DrawRoundedRectangle(graphics, bgBrush, rect, 10);
-            }
-        }
-
-        /// <summary>
-        /// Volume-based painting - Updates on new volume bars OR risk state changes!
+        /// Advanced painting with Session Angel graphics
         /// </summary>
         public override void OnPaintChart(PaintChartEventArgs args)
         {
             if (Count < 1) return;
 
-            // Check for new volume bar
-            _newVolumeBarDetected = (Count != _lastVolumeBarCount);
-
-            // Check for risk state change (CRITICAL: Always show risk warnings!)
-            var riskStateChanged = (_riskState != _lastPaintedRiskState);
-
-            // Force repaint for animations when in warning/danger states
-            var needsAnimationUpdate = (_riskState > 0) && ShouldUpdateComponent(1 / AnimationSpeed);
-
-            // Force repaint for UI components when enabled (slower updates for performance)
-            var needsPerformanceUpdate = ShowPerformanceMetrics && ShouldUpdateComponent(2);
-            var needsStatsUpdate = ShowSessionStats && ShouldUpdateComponent(2);
-            var needsRiskPanelUpdate = ShowRiskPanel && ShouldUpdateComponent(2);
-
-            // Force repaint if any display component needs updating
-            _forceRepaint = _newVolumeBarDetected || riskStateChanged || needsAnimationUpdate ||
-                           needsPerformanceUpdate || needsStatsUpdate || needsRiskPanelUpdate;
-
-            if (!_forceRepaint)
-                return; // No changes, skip graphics
-
-            _lastVolumeBarCount = Count;
-            _lastPaintedRiskState = _riskState;
-
             try
             {
-                // Since volume bars are infrequent, we can afford HIGH QUALITY graphics!
+                // Enable high-quality rendering
                 args.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 args.Graphics.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
                 args.Graphics.CompositingQuality = CompositingQuality.HighQuality;
 
-                // Draw components using cached objects
-                DrawAngelPanelOptimized(args);
-                DrawRiskStatusIndicatorOptimized(args);
+                // Draw main angel panel
+                DrawAngelPanel(args);
 
+                // Draw risk status indicator
+                DrawRiskStatusIndicator(args);
+
+                // Draw session statistics
                 if (ShowSessionStats)
                 {
-                    DrawSessionStatisticsOptimized(args);
+                    DrawSessionStatistics(args);
                 }
 
-                // Volume stats removed - using real account data only
-
+                // Draw performance metrics
                 if (ShowPerformanceMetrics)
                 {
-                    DrawPerformanceMetricsOptimized(args);
+                    DrawPerformanceMetrics(args);
                 }
 
-                DrawWarningOverlaysOptimized(args);
+                // Draw warning overlays
+                DrawWarningOverlays(args);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"OPAngelSession drawing error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"SessionAngel drawing error: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Draw main angel panel - optimized with cached objects
+        /// Draw main Session Angel panel
         /// </summary>
-        private void DrawAngelPanelOptimized(PaintChartEventArgs args)
+        private void DrawAngelPanel(PaintChartEventArgs args)
         {
             if (!ShowRiskPanel) return;
 
             var rect = args.Rectangle;
             var panelRect = new RectangleF(rect.X + 20, rect.Y + 20, 350, 200);
 
-            // Use cached brushes and optimized gradient
+            // Draw panel background with gradient
             using (var panelBrush = new LinearGradientBrush(
                 panelRect,
                 PanelBackground,
                 Color.FromArgb(120, PanelBackground),
                 LinearGradientMode.Vertical))
             {
-                DrawRoundedRectangle(args.Graphics, panelBrush, panelRect, 15);
+                args.Graphics.FillRoundRectangle(panelBrush, panelRect, 15);
             }
 
-            // Optimized border color selection
-            Color borderColor;
-            switch (_riskState)
+            // Draw panel border with angel glow
+            var borderColor = _dangerActive ? DangerColor :
+                             _warningActive ? WarningColor : SafeColor;
+
+            using (var borderPen = new Pen(Color.FromArgb((int)(200 * _warningPulse), borderColor), 2))
             {
-                case 2: borderColor = DangerColor; break;
-                case 1: borderColor = WarningColor; break;
-                default: borderColor = SafeColor; break;
+                args.Graphics.DrawRoundRectangle(borderPen, panelRect, 15);
             }
 
-            using (var borderPen = new Pen(CreateAnimatedColor(_warningPulse * 200 / 255f, borderColor), 2))
+            // Draw angel header
+            var headerText = "👼 SESSION ANGEL";
+            using (var headerBrush = new SolidBrush(Color.White))
             {
-                DrawRoundedRectangleBorder(args.Graphics, borderPen, panelRect, 15);
+                args.Graphics.DrawString(headerText, _headerFont, headerBrush,
+                    panelRect.X + 15, panelRect.Y + 10);
             }
 
-            // Draw header using cached brush
-            args.Graphics.DrawString("👼 VOLUME GUARD ANGEL", _headerFont, _cachedWhiteBrush,
-                panelRect.X + 15, panelRect.Y + 10);
-
-            // Draw status lines - optimized layout
+            // Draw status information
             var y = panelRect.Y + 45;
-            const float lineHeight = 18;
+            var lineHeight = 18;
 
-            // Show which account is being monitored - CLEAN DISPLAY
-            var accountDisplay = string.IsNullOrEmpty(_currentAccountName) ? "Auto-selecting..." : _currentAccountName;
-            DrawStatusLineOptimized(args, $"Account: {accountDisplay}",
-                panelRect.X + 15, y, _cachedSafeBrush);
+            DrawStatusLine(args, $"Active Session: {_currentActiveSession}", panelRect.X + 15, y, SafeColor);
             y += lineHeight;
 
-            // Show available accounts for reference
-            if (!string.IsNullOrEmpty(_availableAccountsList))
-            {
-                DrawStatusLineOptimized(args, $"Available: {_availableAccountsList}",
-                    panelRect.X + 15, y, _cachedGrayBrush);
-                y += lineHeight;
-            }
-
-            // Use cached session name and optimized drawing
-            DrawStatusLineOptimized(args, $"Active Session: {_sessionNames[_currentActiveSessionId]}",
-                panelRect.X + 15, y, _cachedSafeBrush);
+            var pnlColor = _currentSessionPnL >= 0 ? SafeColor : DangerColor;
+            DrawStatusLine(args, $"Session P&L: ${_currentSessionPnL:F2}", panelRect.X + 15, y, pnlColor);
             y += lineHeight;
 
-            var pnlBrush = _currentSessionPnL >= 0 ? _cachedSafeBrush : _cachedDangerBrush;
-            DrawStatusLineOptimized(args, $"Session P&L: ${_currentSessionPnL:F2}",
-                panelRect.X + 15, y, pnlBrush);
+            DrawStatusLine(args, $"Max Drawdown: ${_maxDrawdown:F2}", panelRect.X + 15, y, DangerColor);
             y += lineHeight;
 
-            DrawStatusLineOptimized(args, $"Max Drawdown: ${_maxDrawdown:F2}",
-                panelRect.X + 15, y, _cachedDangerBrush);
+            DrawStatusLine(args, $"Max Profit: ${_maxProfit:F2}", panelRect.X + 15, y, SafeColor);
             y += lineHeight;
 
-            DrawStatusLineOptimized(args, $"Max Profit: ${_maxProfit:F2}",
-                panelRect.X + 15, y, _cachedSafeBrush);
-            y += lineHeight;
-
-            var lastDayBrush = _lastDayProfit >= 0 ? _cachedSafeBrush : _cachedDangerBrush;
-            DrawStatusLineOptimized(args, $"Yesterday P&L: ${_lastDayProfit:F2}",
-                panelRect.X + 15, y, lastDayBrush);
-            y += lineHeight;
-
-            // Draw volume information
-            y += 10;
-            DrawStatusLineOptimized(args, $"Volume Bars: {_volumeBarCount} | Size: {VolumeBarSize}",
-                panelRect.X + 15, y, _cachedGrayBrush);
-            y += lineHeight;
-            DrawStatusLineOptimized(args, $"Current Volume: {_currentVolumeBarVolume:F0}",
-                panelRect.X + 15, y, _cachedGrayBrush);
+            DrawStatusLine(args, $"Yesterday P&L: ${_lastDayProfit:F2}", panelRect.X + 15, y,
+                _lastDayProfit >= 0 ? SafeColor : DangerColor);
             y += lineHeight;
 
             // Draw risk levels
-            DrawStatusLineOptimized(args, $"Warning at: ${WarningThreshold:F0}",
-                panelRect.X + 15, y, _cachedWarningBrush);
+            y += 10;
+            DrawStatusLine(args, $"Warning at: ${WarningThreshold:F0}", panelRect.X + 15, y, WarningColor);
             y += lineHeight;
-            DrawStatusLineOptimized(args, $"Danger at: ${DailyLossLimit:F0}",
-                panelRect.X + 15, y, _cachedDangerBrush);
+            DrawStatusLine(args, $"Danger at: ${DailyLossLimit:F0}", panelRect.X + 15, y, DangerColor);
         }
 
         /// <summary>
-        /// Draw status line - optimized with cached brush
+        /// Draw status line with color
         /// </summary>
-        private void DrawStatusLineOptimized(PaintChartEventArgs args, string text, float x, float y, SolidBrush brush)
+        private void DrawStatusLine(PaintChartEventArgs args, string text, float x, float y, Color color)
         {
-            args.Graphics.DrawString(text, _sessionFont, brush, x, y);
+            using (var brush = new SolidBrush(color))
+            {
+                args.Graphics.DrawString(text, _sessionFont, brush, x, y);
+            }
         }
 
         /// <summary>
-        /// Draw risk status indicator - optimized
+        /// Draw risk status indicator
         /// </summary>
-        private void DrawRiskStatusIndicatorOptimized(PaintChartEventArgs args)
+        private void DrawRiskStatusIndicator(PaintChartEventArgs args)
         {
             var rect = args.Rectangle;
             var indicatorRect = new RectangleF(rect.Right - 100, rect.Y + 20, 70, 70);
 
-            // Optimized status determination
+            // Determine status color and text
             Color statusColor;
             string statusText;
-            float intensity;
 
-            switch (_riskState)
+            if (_dangerActive)
             {
-                case 2: // Danger
-                    statusColor = CreateAnimatedColor(_dangerFlash, DangerColor);
-                    statusText = "DANGER";
-                    intensity = _dangerFlash;
-                    break;
-                case 1: // Warning
-                    statusColor = CreateAnimatedColor(_warningPulse, WarningColor);
-                    statusText = "WARNING";
-                    intensity = _warningPulse;
-                    break;
-                default: // Safe
-                    statusColor = SafeColor;
-                    statusText = "SAFE";
-                    intensity = 1.0f;
-                    break;
+                statusColor = Color.FromArgb((int)(255 * _dangerFlash), DangerColor);
+                statusText = "DANGER";
+            }
+            else if (_warningActive)
+            {
+                statusColor = Color.FromArgb((int)(255 * _warningPulse), WarningColor);
+                statusText = "WARNING";
+            }
+            else
+            {
+                statusColor = SafeColor;
+                statusText = "SAFE";
             }
 
             // Draw status circle
-            using (var statusBrush = new SolidBrush(CreateAlphaColor(150, statusColor)))
+            using (var statusBrush = new SolidBrush(Color.FromArgb(150, statusColor)))
             {
                 args.Graphics.FillEllipse(statusBrush, indicatorRect);
             }
@@ -965,16 +624,18 @@ namespace TradingSessions
         }
 
         /// <summary>
-        /// Draw session statistics - MOVED 40% more contrary to Volume Guard Angel
+        /// Draw session statistics
         /// </summary>
-        private void DrawSessionStatisticsOptimized(PaintChartEventArgs args)
+        private void DrawSessionStatistics(PaintChartEventArgs args)
         {
             var rect = args.Rectangle;
-            // MOVED: Volume Guard Angel is at top-left (X+20, Y+20), so move stats 40% more towards bottom-right
-            var statsRect = new RectangleF(rect.Right - 820, rect.Bottom - 200, 300, 120);
+            var statsRect = new RectangleF(rect.X + 20, rect.Y + 240, 300, 120);
 
             // Background
-            DrawBackgroundPanel(args.Graphics, statsRect, Color.FromArgb(20, 20, 30));
+            using (var bgBrush = new SolidBrush(Color.FromArgb(160, 20, 20, 30)))
+            {
+                args.Graphics.FillRoundRectangle(bgBrush, statsRect, 10);
+            }
 
             // Header
             using (var headerBrush = new SolidBrush(Color.LightBlue))
@@ -983,35 +644,39 @@ namespace TradingSessions
                     statsRect.X + 10, statsRect.Y + 10);
             }
 
-            // Statistics content - optimized layout
             var y = statsRect.Y + 35;
-            const float lineHeight = 16;
+            var lineHeight = 16;
 
-            args.Graphics.DrawString($"MFE (Max Favorable): ${_mfe:F2}", _statsFont, _cachedGrayBrush, statsRect.X + 10, y);
-            y += lineHeight;
-            args.Graphics.DrawString($"MAE (Max Adverse): ${_mae:F2}", _statsFont, _cachedGrayBrush, statsRect.X + 10, y);
-            y += lineHeight;
-            args.Graphics.DrawString($"Total Trades: {_totalTrades}", _statsFont, _cachedGrayBrush, statsRect.X + 10, y);
-            y += lineHeight;
-
-            var winRate = _totalTrades > 0 ? (_winningTrades * 100.0 / _totalTrades) : 0.0;
-            args.Graphics.DrawString($"Win Rate: {winRate:F1}%", _statsFont, _cachedGrayBrush, statsRect.X + 10, y);
-            y += lineHeight;
-            args.Graphics.DrawString($"Largest Win: ${_largestWin:F2}", _statsFont, _cachedGrayBrush, statsRect.X + 10, y);
-            y += lineHeight;
-            args.Graphics.DrawString($"Largest Loss: ${_largestLoss:F2}", _statsFont, _cachedGrayBrush, statsRect.X + 10, y);
+            using (var statsBrush = new SolidBrush(Color.LightGray))
+            {
+                args.Graphics.DrawString($"MFE (Max Favorable): ${_mfe:F2}", _statsFont, statsBrush, statsRect.X + 10, y);
+                y += lineHeight;
+                args.Graphics.DrawString($"MAE (Max Adverse): ${_mae:F2}", _statsFont, statsBrush, statsRect.X + 10, y);
+                y += lineHeight;
+                args.Graphics.DrawString($"Total Trades: {_totalTrades}", _statsFont, statsBrush, statsRect.X + 10, y);
+                y += lineHeight;
+                args.Graphics.DrawString($"Win Rate: {(_totalTrades > 0 ? (_winningTrades * 100.0 / _totalTrades) : 0):F1}%",
+                    _statsFont, statsBrush, statsRect.X + 10, y);
+                y += lineHeight;
+                args.Graphics.DrawString($"Largest Win: ${_largestWin:F2}", _statsFont, statsBrush, statsRect.X + 10, y);
+                y += lineHeight;
+                args.Graphics.DrawString($"Largest Loss: ${_largestLoss:F2}", _statsFont, statsBrush, statsRect.X + 10, y);
+            }
         }
 
         /// <summary>
-        /// Draw performance metrics - optimized
+        /// Draw performance metrics
         /// </summary>
-        private void DrawPerformanceMetricsOptimized(PaintChartEventArgs args)
+        private void DrawPerformanceMetrics(PaintChartEventArgs args)
         {
             var rect = args.Rectangle;
             var metricsRect = new RectangleF(rect.X + 340, rect.Y + 240, 250, 120);
 
             // Background
-            DrawBackgroundPanel(args.Graphics, metricsRect, Color.FromArgb(30, 20, 20));
+            using (var bgBrush = new SolidBrush(Color.FromArgb(160, 30, 20, 20)))
+            {
+                args.Graphics.FillRoundRectangle(bgBrush, metricsRect, 10);
+            }
 
             // Header
             using (var headerBrush = new SolidBrush(Color.LightCoral))
@@ -1020,76 +685,75 @@ namespace TradingSessions
                     metricsRect.X + 10, metricsRect.Y + 10);
             }
 
-            // Performance bars - optimized drawing
-            DrawPerformanceBarOptimized(args, "P&L", _currentSessionPnL, metricsRect.X + 10, metricsRect.Y + 40, 200, 15);
-            DrawPerformanceBarOptimized(args, "Risk", -Math.Abs(_maxDrawdown), metricsRect.X + 10, metricsRect.Y + 65, 200, 15);
-            DrawPerformanceBarOptimized(args, "Profit", _maxProfit, metricsRect.X + 10, metricsRect.Y + 90, 200, 15);
+            // Draw performance bars
+            DrawPerformanceBar(args, "P&L", _currentSessionPnL, metricsRect.X + 10, metricsRect.Y + 40, 200, 15);
+            DrawPerformanceBar(args, "Risk", -Math.Abs(_maxDrawdown), metricsRect.X + 10, metricsRect.Y + 65, 200, 15);
+            DrawPerformanceBar(args, "Profit", _maxProfit, metricsRect.X + 10, metricsRect.Y + 90, 200, 15);
         }
 
         /// <summary>
-        /// Draw performance bar - optimized calculations
+        /// Draw performance bar
         /// </summary>
-        private void DrawPerformanceBarOptimized(PaintChartEventArgs args, string label, double value, float x, float y, float width, float height)
+        private void DrawPerformanceBar(PaintChartEventArgs args, string label, double value, float x, float y, float width, float height)
         {
             // Background bar
             var barRect = new RectangleF(x + 50, y, width - 50, height);
-            using (var bgBrush = new SolidBrush(CreateAlphaColor(100, Color.Gray)))
+            using (var bgBrush = new SolidBrush(Color.FromArgb(100, Color.Gray)))
             {
                 args.Graphics.FillRectangle(bgBrush, barRect);
             }
 
-            // Value bar - optimized calculations
-            var denominator = Math.Max(DailyLossLimit, 1.0);
-            var valuePercent = Math.Min(Math.Abs(value) / denominator, 1.0);
+            // Value bar
+            var valuePercent = Math.Min(Math.Abs(value) / Math.Max(DailyLossLimit, 1), 1.0);
             var valueWidth = (float)(valuePercent * (width - 50));
             var valueRect = new RectangleF(x + 50, y, valueWidth, height);
 
-            // Optimized color selection
-            Color barColor = value >= 0 ? SafeColor :
-                           (value <= -WarningThreshold ? DangerColor : WarningColor);
-
-            using (var valueBrush = new SolidBrush(CreateAlphaColor(180, barColor)))
+            var barColor = value >= 0 ? SafeColor : (value <= -WarningThreshold ? DangerColor : WarningColor);
+            using (var valueBrush = new SolidBrush(Color.FromArgb(180, barColor)))
             {
                 args.Graphics.FillRectangle(valueBrush, valueRect);
             }
 
             // Label
-            args.Graphics.DrawString(label, _statsFont, _cachedWhiteBrush, x, y);
+            using (var labelBrush = new SolidBrush(Color.White))
+            {
+                args.Graphics.DrawString(label, _statsFont, labelBrush, x, y);
+            }
         }
 
         /// <summary>
-        /// Draw warning overlays - optimized rendering
+        /// Draw warning overlays
         /// </summary>
-        private void DrawWarningOverlaysOptimized(PaintChartEventArgs args)
+        private void DrawWarningOverlays(PaintChartEventArgs args)
         {
-            if (_riskState == 0) return; // Safe - no overlays needed
+            if (!_warningActive && !_dangerActive) return;
 
             var rect = args.Rectangle;
 
-            if (_riskState == 2) // Danger
+            if (_dangerActive)
             {
                 // Full screen danger overlay
-                var overlayColor = CreateAnimatedColor(_dangerFlash * 50 / 255f, DangerColor);
+                var overlayColor = Color.FromArgb((int)(50 * _dangerFlash), DangerColor);
                 using (var overlayBrush = new SolidBrush(overlayColor))
                 {
                     args.Graphics.FillRectangle(overlayBrush, rect);
                 }
 
                 // Danger message
-                const string dangerText = "⚠️ DAILY LOSS LIMIT REACHED! ⚠️";
+                var dangerText = "⚠️ DAILY LOSS LIMIT REACHED! ⚠️";
                 var textSize = args.Graphics.MeasureString(dangerText, _warningFont);
                 var textX = rect.X + (rect.Width - textSize.Width) / 2;
                 var textY = rect.Y + rect.Height / 2 - 50;
 
-                using (var textBrush = new SolidBrush(CreateAnimatedColor(_dangerFlash, Color.White)))
+                using (var textBrush = new SolidBrush(Color.FromArgb((int)(255 * _dangerFlash), Color.White)))
                 {
                     args.Graphics.DrawString(dangerText, _warningFont, textBrush, textX, textY);
                 }
             }
-            else if (_riskState == 1) // Warning
+            else if (_warningActive)
             {
                 // Warning border
-                var borderColor = CreateAnimatedColor(_warningPulse * 100 / 255f, WarningColor);
+                var borderColor = Color.FromArgb((int)(100 * _warningPulse), WarningColor);
                 using (var borderPen = new Pen(borderColor, 5))
                 {
                     args.Graphics.DrawRectangle(borderPen, rect.X + 2, rect.Y + 2, rect.Width - 4, rect.Height - 4);
@@ -1100,19 +764,20 @@ namespace TradingSessions
         #region Helper Methods
 
         /// <summary>
-        /// Dispose graphics resources
+        /// Check if current time is within a trading session
         /// </summary>
-        private void DisposeGraphicsResources()
+        public bool IsInSession(DateTime time, TimeSpan sessionStart, TimeSpan sessionEnd)
         {
-            _headerFont?.Dispose();
-            _sessionFont?.Dispose();
-            _warningFont?.Dispose();
-            _statsFont?.Dispose();
-            _cachedSafeBrush?.Dispose();
-            _cachedWarningBrush?.Dispose();
-            _cachedDangerBrush?.Dispose();
-            _cachedWhiteBrush?.Dispose();
-            _cachedGrayBrush?.Dispose();
+            var timeOfDay = time.TimeOfDay;
+
+            if (sessionEnd > sessionStart)
+            {
+                return timeOfDay >= sessionStart && timeOfDay <= sessionEnd;
+            }
+            else
+            {
+                return timeOfDay >= sessionStart || timeOfDay <= sessionEnd;
+            }
         }
 
         /// <summary>
@@ -1120,54 +785,62 @@ namespace TradingSessions
         /// </summary>
         protected override void OnClear()
         {
-            DisposeGraphicsResources();
+            _headerFont?.Dispose();
+            _sessionFont?.Dispose();
+            _warningFont?.Dispose();
+            _statsFont?.Dispose();
             base.OnClear();
         }
 
         #endregion
 
-        #region Public Properties - Optimized Access
+        #region Public Properties
 
         public double CurrentSessionPnL => _currentSessionPnL;
         public double MaxDrawdown => _maxDrawdown;
         public double MaxProfit => _maxProfit;
-        public bool IsWarningActive => _riskState == 1;
-        public bool IsDangerActive => _riskState == 2;
-        public string CurrentActiveSession => _sessionNames[_currentActiveSessionId];
+        public bool IsWarningActive => _warningActive;
+        public bool IsDangerActive => _dangerActive;
+        public string CurrentActiveSession => _currentActiveSession;
         public double MFE => _mfe;
         public double MAE => _mae;
 
         #endregion
+    }
 
+    #region Extension Methods (reusing from sessionsGDI)
 
-        #region Helper Methods - CLEAN GRAPHICS
-
+    /// <summary>
+    /// Extension methods for advanced graphics operations
+    /// </summary>
+    public static class SessionAngelGraphicsExtensions
+    {
         /// <summary>
-        /// CLEAN: Draw rounded rectangle fill - no extensions needed
+        /// Draw rounded rectangle
         /// </summary>
-        private void DrawRoundedRectangle(Graphics graphics, Brush brush, RectangleF rect, float radius)
+        public static void FillRoundRectangle(this Graphics graphics, Brush brush, RectangleF rect, float radius)
         {
-            using (var path = CreateRoundedRectPath(rect, radius))
+            using (var path = GetRoundRectPath(rect, radius))
             {
                 graphics.FillPath(brush, path);
             }
         }
 
         /// <summary>
-        /// CLEAN: Draw rounded rectangle border - no extensions needed  
+        /// Draw rounded rectangle outline
         /// </summary>
-        private void DrawRoundedRectangleBorder(Graphics graphics, Pen pen, RectangleF rect, float radius)
+        public static void DrawRoundRectangle(this Graphics graphics, Pen pen, RectangleF rect, float radius)
         {
-            using (var path = CreateRoundedRectPath(rect, radius))
+            using (var path = GetRoundRectPath(rect, radius))
             {
                 graphics.DrawPath(pen, path);
             }
         }
 
         /// <summary>
-        /// CLEAN: Create rounded rectangle path
+        /// Create rounded rectangle path
         /// </summary>
-        private GraphicsPath CreateRoundedRectPath(RectangleF rect, float radius)
+        private static GraphicsPath GetRoundRectPath(RectangleF rect, float radius)
         {
             var path = new GraphicsPath();
             radius = Math.Min(radius, Math.Min(rect.Width, rect.Height) / 2);
@@ -1180,7 +853,7 @@ namespace TradingSessions
 
             return path;
         }
-
-        #endregion
     }
+
+    #endregion
 }
