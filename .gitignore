@@ -9,3 +9,5 @@ __pycache__/
 *.pyd
 *.pdb
 *.egg       
+/.vs
+/obj
