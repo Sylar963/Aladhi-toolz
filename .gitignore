@@ -9,3 +9,6 @@ __pycache__/
 *.pyd
 *.pdb
 *.egg       
+/obj/Release
+/.vs
+/obj
