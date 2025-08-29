@@ -13,8 +13,7 @@ namespace OpeningRangeBreakout
     /// <summary>
     /// Opening Range with Breakouts & Targets Indicator - Professional HFT Implementation
     /// Calculates Opening Range levels with dynamic targets and breakout signals
-    /// Identical logic to PineScript version with enhanced performance and visuals
-    /// © LuxAlgo - Converted for Quantower by HFT Engineering Team
+   
     /// </summary>
     public class OpeningRangeBreakoutIndicator : Indicator
     {
@@ -90,9 +89,9 @@ namespace OpeningRangeBreakout
         private DateTime _lastStatsUpdate = DateTime.MinValue;
         private const int MAX_SESSION_HISTORY = 500; // Keep last 500 sessions
         
-        // STATISTICS STATE MANAGEMENT - BUG FIX #2
+        // STATISTICS STATE MANAGEMENT - 
         private bool _currentSessionFinalized = false; // Atomic flag to prevent double-processing
-        private bool _statisticsDirty = false; // Only recalculate when needed
+        private bool _statisticsDirty = false; 
         private readonly Dictionary<int, (bool hasUp, bool hasDown, DateTime? upTime, DateTime? downTime)> _breakoutCache = 
             new Dictionary<int, (bool, bool, DateTime?, DateTime?)>(); // Cache breakout validation results
 
@@ -241,7 +240,7 @@ namespace OpeningRangeBreakout
 
         /// <summary>
         /// Validates if an OR session has valid data for statistics calculations
-        /// HFT Pattern: Guard Clauses for fail-fast validation
+      
         /// </summary>
         private bool IsValidORSession(ORSessionStatistics session)
         {
@@ -253,8 +252,7 @@ namespace OpeningRangeBreakout
         }
 
         /// <summary>
-        /// Unified breakout detection method - Single source of truth for all statistics
-        /// HFT Pattern: Atomic validation with consistent logic across all calculations
+     
         /// </summary>
         private (bool hasUpBreakout, bool hasDownBreakout, DateTime? upTime, DateTime? downTime) 
             ValidateSessionBreakouts(ORSessionStatistics session)
@@ -272,7 +270,6 @@ namespace OpeningRangeBreakout
             DateTime? upTime = null;
             DateTime? downTime = null;
 
-            // ENHANCED BREAKOUT DETECTION with dynamic threshold (BUG FIX #1 & #3)
             double threshold = GetMinimumBreakoutThreshold();
             
             if (session.MaxExtensionUp >= threshold && IsValidBreakout(session.MaxExtensionUp, session.FirstUpBreakoutTime))
@@ -295,8 +292,7 @@ namespace OpeningRangeBreakout
         }
 
         /// <summary>
-        /// Invalidates breakout cache when session data changes
-        /// HFT Pattern: Cache coherency management
+       
         /// </summary>
         private void InvalidateBreakoutCache(int sessionId = -1)
         {
@@ -309,8 +305,7 @@ namespace OpeningRangeBreakout
         }
         
         /// <summary>
-        /// Calculate dynamic breakout threshold based on instrument and OR width - BUG FIX #1
-        /// This replaces the microscopic fixed threshold with meaningful, instrument-appropriate values
+        /// 
         /// </summary>
         private double GetMinimumBreakoutThreshold()
         {
@@ -338,7 +333,7 @@ namespace OpeningRangeBreakout
         }
         
         /// <summary>
-        /// Validate if a breakout is meaningful with time and price persistence - BUG FIX #3
+        /// Validate if a breakout is meaningful with time and price persistence - 
         /// </summary>
         private bool IsValidBreakout(double extension, DateTime? breakoutTime)
         {
@@ -356,8 +351,7 @@ namespace OpeningRangeBreakout
         }
 
         /// <summary>
-        /// Diagnostic method for statistics debugging - ERROR RECOVERY (BUG FIX #5)
-        /// Enhanced with threshold and extension analysis
+     
         /// </summary>
         private void LogStatisticsDiagnostics()
         {
