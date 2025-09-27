@@ -4,7 +4,16 @@ Rules.md
 .claude
 QWEN.md
 pinescript/
-Thalex_Options/enhanced_mad_straddle_system
+enhanced_mad_straddle_system/
+infrastructure/
+options_trading/
+BUG_REGISTRY.md
+DATA_PATTERNS.py
+PositionCalculatorGuide.md
+ReadMAD.md
+perp_quoter.py
+
+
 
 #python __pycache__/
 __pycache__/
