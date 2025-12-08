@@ -90,6 +90,7 @@ I am available for consulting engagements and collaborative research projects. M
 *   **Upwork:** **[Hire Me for Consulting]([https://www.upwork.com/freelancers/aladhimarkets](https://upwork.com/freelancers/aladhimarkets?mp_source=share)**
 *   **Professional Inquiries:** [propfirmbuho@gmail.com](mailto:propfirmbuho@gmail.com)
 *   <!--**Connect on LinkedIn:** [My Professional Profile](https://linkedin.com/in/yourprofile)-->
+*   **WEBSITE** Check my other venues of work. I also build websites. You can find more on [websomx]www.websomx.com) 
 
 ---
 
