@@ -1,27 +1,33 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8</TargetFramework>
+    <!-- Quantower v1.147.1 is built on .NET 10. Keep this pair aligned. -->
+    <TargetFramework>net10.0-windows</TargetFramework>
     <LangVersion>latest</LangVersion>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <Platforms>AnyCPU</Platforms>
     <AlgoType>Indicator</AlgoType>
     <AssemblyName>SessionGuard</AssemblyName>
-    <RootNamespace>SessionGuard</RootNamespace>
+    <RootNamespace>TradingSessions</RootNamespace>
+    <Nullable>enable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>C:\Users\Yo\Quantower\TradingPlatform\v1.144.2\..\..\Settings\Scripts\Indicators\SessionGuard</OutputPath>
+    <OutputPath>C:\Users\Yo\Quantower\TradingPlatform\v1.147.1\..\..\Settings\Scripts\Indicators\SessionGuard</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>C:\Users\Yo\Quantower\TradingPlatform\v1.144.2\..\..\Settings\Scripts\Indicators\SessionGuard</OutputPath>
+    <OutputPath>C:\Users\Yo\Quantower\TradingPlatform\v1.147.1\..\..\Settings\Scripts\Indicators\SessionGuard</OutputPath>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="SessionGuard.cs" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Drawing.Common" Version="9.0.6" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="TradingPlatform.BusinessLayer">
-      <HintPath>C:\Users\Yo\Quantower\TradingPlatform\v1.144.2\bin\TradingPlatform.BusinessLayer.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>C:\Users\Yo\Quantower\TradingPlatform\v1.147.1\bin\TradingPlatform.BusinessLayer.dll</HintPath>
+      <Private>false</Private>
     </Reference>
   </ItemGroup>
 </Project>

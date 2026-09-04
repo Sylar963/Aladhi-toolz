@@ -12,3 +12,5 @@ __pycache__/
 /obj/Release
 /.vs
 /obj
+/bin/
+/artifacts/
