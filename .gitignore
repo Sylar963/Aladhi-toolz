@@ -1,6 +1,24 @@
 GEMINI.md
+<<<<<<< HEAD
 CLAUDE.MD
+Rules.md 
+.claude
+QWEN.md
+pinescript/
+enhanced_mad_straddle_system/
+infrastructure/
+options_trading/
+BUG_REGISTRY.md
+DATA_PATTERNS.py
+PositionCalculatorGuide.md
+ReadMAD.md
+perp_quoter.py
 
+
+=======
+CLAUDE.md
+/.claude
+>>>>>>> 8aafaeda43cd79973f8614231fb2199487e98ad0
 
 #python __pycache__/
 __pycache__/
